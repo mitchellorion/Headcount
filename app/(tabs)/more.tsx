@@ -217,7 +217,7 @@ export default function MoreScreen() {
             icon={ShieldCheck}
             label="Privacy policy"
             onPress={() =>
-              Linking.openURL('https://ctrlaltorion.com/headcount/privacy').catch(() =>
+              Linking.openURL('https://mitchellorion.github.io/Headcount/privacy/').catch(() =>
                 toast.show('Add your privacy URL before launch.')
               )
             }
