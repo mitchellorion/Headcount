@@ -35,6 +35,15 @@
     },
     "plugins": [
       "expo-router",
+      ["expo-build-properties", {
+        "android": {
+          "kotlinVersion": "1.9.24",
+          "buildToolsVersion": "34.0.0",
+          "compileSdkVersion": 34,
+          "targetSdkVersion": 34,
+          "minSdkVersion": 24
+        }
+      }],
       "expo-font",
       ["expo-image-picker", {
         "photosPermission": "HeadCount needs access to your photos so you can add a picture to a contact.",
