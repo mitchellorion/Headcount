@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeadCount – Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #090909;
+      color: #d4d4c8;
+      line-height: 1.7;
+      padding: 48px 24px 80px;
+    }
+    .wrap { max-width: 680px; margin: 0 auto; }
+    .logo { display: flex; align-items: center; gap: 12px; margin-bottom: 48px; }
+    .logo-mark {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #c7ff4f; display: flex; align-items: center;
+      justify-content: center; font-weight: 800; font-size: 18px; color: #0a0a0a;
+    }
+    .logo-name { font-size: 20px; font-weight: 700; color: #f5f5f1; }
+    h1 { font-size: 32px; font-weight: 800; color: #f5f5f1; margin-bottom: 8px; letter-spacing: -0.5px; }
+    .updated { font-size: 13px; color: #555; margin-bottom: 40px; }
+    h2 { font-size: 16px; font-weight: 700; color: #c7ff4f; text-transform: uppercase;
+         letter-spacing: 1.2px; margin: 36px 0 10px; }
+    p { margin-bottom: 14px; font-size: 15px; color: #a8a89e; }
+    ul { margin: 0 0 14px 20px; }
+    li { font-size: 15px; color: #a8a89e; margin-bottom: 6px; }
+    a { color: #c7ff4f; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .callout {
+      background: #141414; border: 1px solid #222; border-left: 3px solid #c7ff4f;
+      border-radius: 8px; padding: 16px 20px; margin: 20px 0;
+    }
+    .callout p { margin: 0; color: #d4d4c8; }
+    footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid #1e1e1e;
+             font-size: 12px; color: #444; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">
+      <div class="logo-mark">H</div>
+      <span class="logo-name">HeadCount .</span>
+    </div>
+
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: June 5, 2025</p>
+
+    <div class="callout">
+      <p><strong style="color:#f5f5f1;">The short version:</strong> HeadCount stores your contacts on your device by default. Cloud backup is optional and entirely your choice. We don't sell your data, share it with third parties, or run ads.</p>
+    </div>
+
+    <h2>1. Who we are</h2>
+    <p>HeadCount is developed and operated by <strong style="color:#f5f5f1;">ctrlaltorion</strong>. If you have any questions about this policy, contact us at <a href="mailto:mitchell@ctrlaltorion.com">mitchell@ctrlaltorion.com</a>.</p>
+
+    <h2>2. What data we collect</h2>
+    <p>HeadCount is designed to collect as little data as possible.</p>
+
+    <p><strong style="color:#f5f5f1;">If you use the app without an account (local-only mode):</strong></p>
+    <ul>
+      <li>All contact data — names, photos, notes, dates, and preferences — is stored exclusively on your device using your phone's local storage.</li>
+      <li>We collect nothing. No analytics, no crash reports, no usage data.</li>
+    </ul>
+
+    <p><strong style="color:#f5f5f1;">If you create an optional cloud backup account:</strong></p>
+    <ul>
+      <li><strong>Email address</strong> — used to identify your account.</li>
+      <li><strong>Password</strong> — stored as a secure hash; we never see your plaintext password.</li>
+      <li><strong>Contact data you choose to back up</strong> — names, ages, photos (as URIs), notes, date plans, and the preferences you set for each contact. This data is encrypted in transit and stored on Supabase-hosted infrastructure.</li>
+    </ul>
+
+    <h2>3. How we use your data</h2>
+    <ul>
+      <li>To sync your contacts across devices when you sign in.</li>
+      <li>To restore your data if you reinstall the app.</li>
+    </ul>
+    <p>We do not use your data for advertising, profiling, or any purpose beyond operating the app's cloud backup feature.</p>
+
+    <h2>4. Who we share data with</h2>
+    <p>We do not sell or share your personal data with third parties for their own purposes. Your cloud backup data is stored using <strong style="color:#f5f5f1;">Supabase</strong> (<a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a>), our database provider, solely to provide the backup service.</p>
+
+    <h2>5. Data security</h2>
+    <ul>
+      <li>All data in transit is encrypted via HTTPS/TLS.</li>
+      <li>Cloud data is protected by Row-Level Security — only your account can read or write your contacts.</li>
+      <li>Auth tokens are stored in your device's secure keychain (iOS Keychain / Android Keystore), not in plain storage.</li>
+    </ul>
+
+    <h2>6. Sensitive content</h2>
+    <p>HeadCount is intended for adults (18+). The contact information you store may include personal and sensitive details. This information stays on your device and is never shared with us or third parties unless you explicitly enable cloud backup.</p>
+
+    <h2>7. Your rights and choices</h2>
+    <ul>
+      <li><strong>Delete local data:</strong> Delete the app. All locally stored data is removed.</li>
+      <li><strong>Delete cloud data:</strong> Sign in, use "Delete all contacts" in the More tab, then contact us to delete your account.</li>
+      <li><strong>Export your data:</strong> Use the "Export data" option in the More tab at any time.</li>
+      <li><strong>Opt out of cloud backup:</strong> Simply don't create an account, or sign out. Your data stays local.</li>
+    </ul>
+
+    <h2>8. Children</h2>
+    <p>HeadCount is not intended for users under 18. We do not knowingly collect data from minors. If you believe a minor has created an account, contact us and we will delete it.</p>
+
+    <h2>9. Changes to this policy</h2>
+    <p>We may update this policy occasionally. Material changes will be noted with a new "Last updated" date at the top. Continued use of the app after changes constitutes acceptance.</p>
+
+    <h2>10. Contact</h2>
+    <p>Questions or requests: <a href="mailto:mitchell@ctrlaltorion.com">mitchell@ctrlaltorion.com</a></p>
+
+    <footer>
+      &copy; 2025 ctrlaltorion. HeadCount is made with care for the community.
+    </footer>
+  </div>
+</body>
+</html>
