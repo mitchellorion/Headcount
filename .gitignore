@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native
+android/
+ios/
+*.apk
+*.aab
+*.ipa
+
+# Metro
+.metro-health-check*
+
+# Env / secrets
+.env*.local
+.env
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+
+# Local builds / EAS
+google-services.json
+*.keystore
