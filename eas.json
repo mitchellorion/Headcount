@@ -9,7 +9,8 @@
       "distribution": "internal",
       "channel": "development",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "ubuntu-22.04-jdk-17-ndk-r25c"
       },
       "ios": {
         "simulator": true
@@ -19,7 +20,8 @@
       "distribution": "internal",
       "channel": "preview",
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "ubuntu-22.04-jdk-17-ndk-r25c"
       },
       "ios": {
         "simulator": false
@@ -29,7 +31,8 @@
       "autoIncrement": true,
       "channel": "production",
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "image": "ubuntu-22.04-jdk-17-ndk-r25c"
       },
       "ios": {}
     }
