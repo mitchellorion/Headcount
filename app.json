@@ -9,7 +9,7 @@
     "scheme": "headcount",
     "userInterfaceStyle": "dark",
     "backgroundColor": "#090909",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -52,14 +52,6 @@
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    },
-    "extra": {
-      "router": {
-        "origin": false
-      },
-      "eas": {
-        "projectId": "3beb9bdf-2656-443c-87b9-86b4e9624efb"
-      }
     }
   }
 }
