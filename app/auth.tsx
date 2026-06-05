@@ -5,11 +5,14 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { useAuth } from '@/lib/useAuth';
+import { useContacts } from '@/store/ContactsContext';
+import { CloudRepository } from '@/store/CloudRepository';
 
 type Mode = 'signin' | 'signup';
 
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
+  const { contacts } = useContacts();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,11 +28,15 @@ export default function AuthScreen() {
     }
     setLoading(true);
     try {
-      const { error: err } =
+      const { data, error: err } =
         mode === 'signin'
           ? await signIn(email.trim(), password)
           : await signUp(email.trim(), password);
       if (err) { setError(err.message); return; }
+      // On new account creation, push local contacts to cloud immediately.
+      if (mode === 'signup' && data?.user?.id && contacts.length > 0) {
+        CloudRepository.syncAll(data.user.id, contacts).catch(() => undefined);
+      }
       router.replace('/(tabs)/');
     } finally {
       setLoading(false);
@@ -66,10 +73,11 @@ export default function AuthScreen() {
         <TouchableOpacity style={s.btn} onPress={handleSubmit} disabled={loading}>
           {loading ? <ActivityIndicator color="#0a0a0a" /> : <Text style={s.btnText}>{mode === 'signin' ? 'Sign In' : 'Create Account'}</Text>}
         </TouchableOpacity>
-        <TouchableOpacity style={s.skip} onPress={() => router.replace('/(tabs)/')}>
-          <Text style={s.skipText}>Continue without account</Text>
-        </TouchableOpacity>
       </View>
+
+      <TouchableOpacity style={s.skip} onPress={() => router.replace('/(tabs)/')}>
+        <Text style={s.skipText}>Continue without account</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 }
@@ -90,6 +98,6 @@ const s = StyleSheet.create({
   error: { color: '#ff6b6b', fontSize: 13, textAlign: 'center' },
   btn: { backgroundColor: '#c7ff4f', borderRadius: 99, paddingVertical: 15, alignItems: 'center', marginTop: 4 },
   btnText: { fontSize: 15, fontWeight: '700', color: '#0a0a0a' },
-  skip: { alignItems: 'center', paddingVertical: 12 },
+  skip: { alignItems: 'center', paddingVertical: 20 },
   skipText: { fontSize: 13, color: '#555' },
 });

@@ -12,45 +12,120 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronRight,
+  Cloud,
   Download,
   Lock,
+  LogOut,
   type LucideIcon,
   RotateCcw,
   ShieldCheck,
   Star,
   Trash2,
+  Upload,
   Users,
 } from 'lucide-react-native';
+import { router } from 'expo-router';
+import * as DocumentPicker from 'expo-document-picker';
+import * as FileSystem from 'expo-file-system';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { useContacts } from '@/store/ContactsContext';
 import { useToast } from '@/components/Toast';
 import { AppHeader } from '@/components/AppHeader';
 import { SectionLabel } from '@/components/SectionLabel';
+import { supabase } from '@/lib/supabase';
+import { CloudRepository } from '@/store/CloudRepository';
+import { Contact } from '@/types';
 
 export default function MoreScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
-  const { contacts, resetToSeed, clearAll } = useContacts();
+  const { contacts, resetToSeed, clearAll, cloudUserId, syncToCloud } = useContacts();
 
   const stats = useMemo(() => {
     const active = contacts.filter((c) => c.active).length;
     const faves = contacts.filter((c) => c.favorite).length;
-    const dates = contacts.reduce((n, c) => n + c.dates.length, 0);
-    return { total: contacts.length, active, faves, dates };
+    return { total: contacts.length, active, faves };
   }, [contacts]);
+
+  const onCloudBackup = async () => {
+    if (!cloudUserId) {
+      router.push('/auth');
+      return;
+    }
+    try {
+      await syncToCloud();
+      toast.show('Contacts backed up to cloud.');
+    } catch {
+      toast.show('Backup failed. Check your connection.');
+    }
+  };
+
+  const onSignOut = () => {
+    Alert.alert('Sign out?', 'Your contacts stay on this device.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Sign out',
+        style: 'destructive',
+        onPress: () => {
+          supabase.auth.signOut();
+          toast.show('Signed out.');
+        },
+      },
+    ]);
+  };
 
   const onExport = async () => {
     try {
       const payload = JSON.stringify({ exportedAt: new Date().toISOString(), contacts }, null, 2);
-      await Share.share({
-        title: 'HeadCount export',
-        message: payload,
-      });
+      await Share.share({ title: 'HeadCount export', message: payload });
     } catch {
       toast.show('Export cancelled.');
     }
   };
+
+  const onImport = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({ type: 'application/json' });
+      if (result.canceled) return;
+      const raw = await FileSystem.readAsStringAsync(result.assets[0].uri);
+      const parsed = JSON.parse(raw);
+      const imported: Contact[] = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed.contacts)
+          ? parsed.contacts
+          : null;
+      if (!imported) {
+        toast.show('Invalid file — expected a HeadCount export.');
+        return;
+      }
+      Alert.alert(
+        `Import ${imported.length} contacts?`,
+        'This will merge with your current roster. Existing contacts with the same ID will be updated.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Import',
+            onPress: () => {
+              imported.forEach((c) => {
+                const existing = contacts.find((x) => x.id === c.id);
+                if (existing) {
+                  updateContact(c.id, c);
+                } else {
+                  addContact(c);
+                }
+              });
+              toast.show(`Imported ${imported.length} contacts.`);
+            },
+          },
+        ]
+      );
+    } catch {
+      toast.show('Could not read file.');
+    }
+  };
+
+  const { updateContact, addContact } = useContacts();
 
   const onReset = () => {
     Alert.alert(
@@ -104,9 +179,22 @@ export default function MoreScreen() {
           <Stat icon={Users} value={stats.active} label="Active" />
         </View>
 
+        <SectionLabel style={styles.group}>Cloud backup</SectionLabel>
+        <View style={styles.card}>
+          {cloudUserId ? (
+            <>
+              <Row icon={Cloud} label="Back up now" hint="Push contacts to your account" onPress={onCloudBackup} />
+              <Row icon={LogOut} label="Sign out" onPress={onSignOut} last />
+            </>
+          ) : (
+            <Row icon={Cloud} label="Enable cloud backup" hint="Create a free account" onPress={onCloudBackup} last />
+          )}
+        </View>
+
         <SectionLabel style={styles.group}>Your data</SectionLabel>
         <View style={styles.card}>
           <Row icon={Download} label="Export data" hint="Share a JSON backup" onPress={onExport} />
+          <Row icon={Upload} label="Import data" hint="Restore from a JSON backup" onPress={onImport} />
           <Row icon={RotateCcw} label="Restore sample data" onPress={onReset} />
           <Row icon={Trash2} label="Delete all contacts" danger onPress={onClear} last />
         </View>
@@ -115,11 +203,12 @@ export default function MoreScreen() {
         <View style={styles.card}>
           <View style={styles.privacyHead}>
             <Lock size={16} color={colors.lime} />
-            <Text style={styles.privacyTitle}>Everything stays on this device</Text>
+            <Text style={styles.privacyTitle}>Your data, your choice</Text>
           </View>
           <Text style={styles.privacyBody}>
-            HeadCount stores your roster locally on your phone. There's no account, and
-            nothing is uploaded to a server. Deleting the app removes your data.
+            HeadCount stores your roster locally on your phone by default. Cloud backup
+            is optional — create a free account to sync across devices. Signing out or
+            deleting the app removes local data.
           </Text>
         </View>
 

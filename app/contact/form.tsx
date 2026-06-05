@@ -26,11 +26,11 @@ import { Button } from '@/components/Button';
 
 const CHEMISTRY: readonly Chemistry[] = ['High', 'Medium', 'Low', 'Unsure'];
 const VIBES: readonly Vibe[] = ['Easy', 'Playful', 'Intense', 'Slow burn', 'Unknown'];
-const POSITIONS: readonly string[] = ['Top', 'Bottom', 'Side', 'Vers'];
-const CUTS: readonly string[] = ['Cut', 'Uncut'];
+const POSITIONS: readonly string[] = ['Top', 'Bottom', 'Side', 'Vers', 'Unknown'];
+const CUTS: readonly string[] = ['Cut', 'Uncut', 'Unknown'];
 const ZODIACS: readonly string[] = [
   'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
-  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces', 'Unknown',
 ];
 
 export default function ContactFormScreen() {

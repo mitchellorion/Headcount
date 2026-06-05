@@ -11,6 +11,8 @@ import { Contact, ContactDraft, DatePlan, Note } from '@/types';
 import { uid } from '@/utils/id';
 import { contactRepository } from '@/store/storage';
 import { makeSeedContacts } from '@/store/seed';
+import { supabase } from '@/lib/supabase';
+import { CloudRepository } from '@/store/CloudRepository';
 
 interface State {
   contacts: Contact[];
@@ -54,8 +56,9 @@ function reducer(state: State, action: Action): State {
 interface ContactsContextValue {
   contacts: Contact[];
   hydrated: boolean;
+  cloudUserId: string | null;
   getById: (id: string) => Contact | undefined;
-  addContact: (draft: ContactDraft) => Contact;
+  addContact: (draft: ContactDraft | Contact) => Contact;
   updateContact: (id: string, patch: Partial<Contact>) => void;
   removeContact: (id: string) => void;
   toggleFavorite: (id: string) => void;
@@ -67,6 +70,7 @@ interface ContactsContextValue {
   markSeenNow: (id: string) => void;
   resetToSeed: () => void;
   clearAll: () => void;
+  syncToCloud: () => Promise<void>;
 }
 
 const ContactsContext = createContext<ContactsContextValue | null>(null);
@@ -76,15 +80,26 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     contacts: [],
     hydrated: false,
   });
+  const [cloudUserId, setCloudUserId] = React.useState<string | null>(null);
 
-  // Hydrate from storage on mount; seed on first ever launch.
+  // Track auth session.
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCloudUserId(session?.user.id ?? null);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setCloudUserId(session?.user.id ?? null);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Hydrate from local storage on mount; seed on first ever launch.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const stored = await contactRepository.load();
       if (cancelled) return;
       if (stored) {
-        // Array present (possibly empty after a user "clear all") -> respect it.
         dispatch({ type: 'HYDRATE', contacts: stored });
       } else {
         const seeded = makeSeedContacts();
@@ -92,12 +107,28 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
         contactRepository.save(seeded).catch(() => undefined);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  // Persist whenever contacts change (after hydration), debounced lightly.
+  // When a user signs in, pull their cloud contacts down (cloud wins if they have data).
+  const prevUserIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!cloudUserId || prevUserIdRef.current === cloudUserId || !state.hydrated) return;
+    prevUserIdRef.current = cloudUserId;
+    CloudRepository.getAll(cloudUserId)
+      .then((cloudContacts) => {
+        if (cloudContacts.length > 0) {
+          dispatch({ type: 'REPLACE_ALL', contacts: cloudContacts });
+          contactRepository.save(cloudContacts).catch(() => undefined);
+        } else {
+          // New account — push local contacts up as the initial backup.
+          CloudRepository.syncAll(cloudUserId, state.contacts).catch(() => undefined);
+        }
+      })
+      .catch((err) => console.warn('[HeadCount] cloud pull failed', err));
+  }, [cloudUserId, state.hydrated]);
+
+  // Persist to local storage whenever contacts change (debounced).
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (!state.hydrated) return;
@@ -117,16 +148,16 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     [state.contacts]
   );
 
-  const addContact = useCallback((draft: ContactDraft): Contact => {
+  const addContact = useCallback((draft: ContactDraft | Contact): Contact => {
     const now = new Date().toISOString();
     const contact: Contact = {
       ...draft,
-      id: uid('c_'),
+      id: (draft as Contact).id ?? uid('c_'),
       photos: draft.photos ?? [],
       notes: draft.notes ?? [],
       dates: draft.dates ?? [],
-      createdAt: now,
-      updatedAt: now,
+      createdAt: (draft as Contact).createdAt ?? now,
+      updatedAt: (draft as Contact).updatedAt ?? now,
     };
     dispatch({ type: 'ADD', contact });
     return contact;
@@ -226,10 +257,16 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'REPLACE_ALL', contacts: [] });
   }, []);
 
+  const syncToCloud = useCallback(async () => {
+    if (!cloudUserId) return;
+    await CloudRepository.syncAll(cloudUserId, state.contacts);
+  }, [cloudUserId, state.contacts]);
+
   const value = useMemo<ContactsContextValue>(
     () => ({
       contacts: state.contacts,
       hydrated: state.hydrated,
+      cloudUserId,
       getById,
       addContact,
       updateContact,
@@ -243,10 +280,12 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       markSeenNow,
       resetToSeed,
       clearAll,
+      syncToCloud,
     }),
     [
       state.contacts,
       state.hydrated,
+      cloudUserId,
       getById,
       addContact,
       updateContact,
@@ -260,6 +299,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
       markSeenNow,
       resetToSeed,
       clearAll,
+      syncToCloud,
     ]
   );
 
