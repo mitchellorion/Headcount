@@ -6,11 +6,11 @@ import { fonts } from '@/theme/typography';
 interface Props<T extends string> {
   label: string;
   options: readonly T[];
-  value: T;
-  onChange: (value: T) => void;
+  value: T | '';
+  onChange: (value: T | '') => void;
 }
 
-/** Single-select pill group used for chemistry / vibe fields. */
+/** Single-select pill group. Tapping the active chip deselects it (value → ''). */
 export function ChipSelect<T extends string>({
   label,
   options,
@@ -26,7 +26,7 @@ export function ChipSelect<T extends string>({
           return (
             <Pressable
               key={opt}
-              onPress={() => onChange(opt)}
+              onPress={() => onChange(selected ? '' : opt)}
               accessibilityRole="button"
               accessibilityState={{ selected }}
               style={[styles.chip, selected && styles.chipSelected]}

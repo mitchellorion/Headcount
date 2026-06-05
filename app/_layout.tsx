@@ -58,6 +58,8 @@ export default function RootLayout() {
                   animation: 'slide_from_right',
                 }}
               >
+                <Stack.Screen name="index" options={{ animation: 'none' }} />
+                <Stack.Screen name="auth" options={{ animation: 'none' }} />
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen name="contact/[id]" />
                 <Stack.Screen
