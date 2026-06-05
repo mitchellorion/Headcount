@@ -36,3 +36,10 @@ yarn-error.*
 # Local builds / EAS
 google-services.json
 *.keystore
+
+
+# Vn44HczDZlmFiaWn
+
+.claude/
+
+supapassword.txt
