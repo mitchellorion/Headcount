@@ -14,7 +14,7 @@ export interface ContactRepository {
 }
 
 const STORAGE_KEY = 'headcount.contacts.v1';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 interface Persisted {
   version: number;
@@ -46,14 +46,23 @@ class AsyncStorageRepository implements ContactRepository {
 }
 
 /** Defensive defaults so older/partial records never crash the UI. */
-function normalize(c: Partial<Contact>): Contact {
+function normalize(c: Partial<Contact> & { photoUri?: string }): Contact {
+  // Migrate legacy single-photo records (schema v1) into the photos array.
+  const photos = Array.isArray(c.photos)
+    ? c.photos.filter(Boolean)
+    : c.photoUri
+      ? [c.photoUri]
+      : [];
   return {
     id: c.id ?? '',
     name: c.name ?? 'Unnamed',
     age: c.age,
     role: c.role,
     location: c.location,
-    photoUri: c.photoUri,
+    photos,
+    position: c.position,
+    cut: c.cut,
+    zodiac: c.zodiac,
     active: c.active ?? false,
     favorite: c.favorite ?? false,
     chemistry: c.chemistry ?? 'Unsure',

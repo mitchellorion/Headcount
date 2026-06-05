@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,6 +50,9 @@ export default function ContactDetailScreen() {
 
   const [noteText, setNoteText] = useState('');
   const [composing, setComposing] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const { width } = useWindowDimensions();
+  const galleryWidth = width - 40; // screen minus the scroll's horizontal padding
 
   if (!contact) {
     return (
@@ -126,19 +132,46 @@ export default function ContactDetailScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.hero}>
-          {contact.photoUri ? (
-            <Image
-              source={{ uri: contact.photoUri }}
-              style={styles.heroImg}
-              contentFit="cover"
-              transition={200}
-            />
+          {contact.photos.length > 0 ? (
+            <>
+              <ScrollView
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                scrollEventThrottle={16}
+                onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) =>
+                  setPhotoIndex(
+                    Math.round(e.nativeEvent.contentOffset.x / galleryWidth)
+                  )
+                }
+              >
+                {contact.photos.map((uri, i) => (
+                  <Image
+                    key={`${uri}-${i}`}
+                    source={{ uri }}
+                    style={{ width: galleryWidth, height: 288 }}
+                    contentFit="cover"
+                    transition={200}
+                  />
+                ))}
+              </ScrollView>
+              {contact.photos.length > 1 && (
+                <View style={styles.dots}>
+                  {contact.photos.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[styles.dot, i === photoIndex && styles.dotActive]}
+                    />
+                  ))}
+                </View>
+              )}
+            </>
           ) : (
             <View style={[styles.heroImg, styles.heroFallback]}>
               <Avatar name={contact.name} size={96} radius={28} />
             </View>
           )}
-          <View style={styles.heroScrim} />
+          <View style={styles.heroScrim} pointerEvents="none" />
           <View style={styles.heroContent}>
             <View style={{ flex: 1 }}>
               <Text style={styles.heroName}>{contact.name}</Text>
@@ -260,6 +293,13 @@ export default function ContactDetailScreen() {
           <View style={styles.facts}>
             <FactRow label="Chemistry" value={contact.chemistry} />
             <FactRow label="Vibe" value={contact.vibe} />
+            {contact.position ? (
+              <FactRow label="Position" value={contact.position} />
+            ) : null}
+            {contact.cut ? <FactRow label="Cut" value={contact.cut} /> : null}
+            {contact.zodiac ? (
+              <FactRow label="Zodiac" value={contact.zodiac} />
+            ) : null}
             <FactRow
               label="Last seen"
               value={contact.lastSeen ? formatShortDate(contact.lastSeen) : '—'}
@@ -348,6 +388,25 @@ const styles = StyleSheet.create({
     backgroundColor: colors.panel2,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  dots: {
+    position: 'absolute',
+    top: 12,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+  },
+  dotActive: {
+    backgroundColor: colors.lime,
+    width: 18,
   },
   heroScrim: {
     position: 'absolute',

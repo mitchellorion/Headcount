@@ -31,7 +31,7 @@ export function ContactCard({ contact, onPress, onToggleFavorite }: Props) {
       accessibilityRole="button"
       accessibilityLabel={`Open ${contact.name}`}
     >
-      <Avatar uri={contact.photoUri} name={contact.name} size={64} radius={14} />
+      <Avatar uri={contact.photos[0]} name={contact.name} size={64} radius={14} />
       <View style={styles.body}>
         <View style={styles.topRow}>
           <View style={styles.nameWrap}>

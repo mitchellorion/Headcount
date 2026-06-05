@@ -12,20 +12,26 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
-import { Camera, X } from 'lucide-react-native';
+import { ImagePlus, Plus, X } from 'lucide-react-native';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { Chemistry, Vibe } from '@/types';
 import { useContacts, useContact } from '@/store/ContactsContext';
 import { useToast } from '@/components/Toast';
-import { Avatar } from '@/components/Avatar';
 import { Field } from '@/components/Field';
 import { ChipSelect } from '@/components/ChipSelect';
 import { Button } from '@/components/Button';
 
 const CHEMISTRY: readonly Chemistry[] = ['High', 'Medium', 'Low', 'Unsure'];
 const VIBES: readonly Vibe[] = ['Easy', 'Playful', 'Intense', 'Slow burn', 'Unknown'];
+const POSITIONS: readonly string[] = ['Top', 'Bottom', 'Side', 'Vers'];
+const CUTS: readonly string[] = ['Cut', 'Uncut'];
+const ZODIACS: readonly string[] = [
+  'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+  'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces',
+];
 
 export default function ContactFormScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
@@ -41,15 +47,18 @@ export default function ContactFormScreen() {
   const [role, setRole] = useState(editing?.role ?? '');
   const [location, setLocation] = useState(editing?.location ?? '');
   const [tagline, setTagline] = useState(editing?.tagline ?? '');
-  const [photoUri, setPhotoUri] = useState<string | undefined>(editing?.photoUri);
+  const [photos, setPhotos] = useState<string[]>(editing?.photos ?? []);
   const [chemistry, setChemistry] = useState<Chemistry>(editing?.chemistry ?? 'Unsure');
   const [vibe, setVibe] = useState<Vibe>(editing?.vibe ?? 'Unknown');
+  const [position, setPosition] = useState<string>(editing?.position ?? '');
+  const [cut, setCut] = useState<string>(editing?.cut ?? '');
+  const [zodiac, setZodiac] = useState<string>(editing?.zodiac ?? '');
   const [active, setActive] = useState(editing?.active ?? true);
   const [favorite, setFavorite] = useState(editing?.favorite ?? false);
 
   const canSave = name.trim().length > 0;
 
-  const pickPhoto = async () => {
+  const addPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
       Alert.alert(
@@ -60,13 +69,17 @@ export default function ContactFormScreen() {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [3, 4],
+      allowsMultipleSelection: true,
+      allowsEditing: false,
       quality: 0.85,
     });
-    if (!result.canceled && result.assets[0]) {
-      setPhotoUri(result.assets[0].uri);
+    if (!result.canceled && result.assets.length) {
+      setPhotos((prev) => [...prev, ...result.assets.map((a) => a.uri)]);
     }
+  };
+
+  const removePhotoAt = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const onSave = () => {
@@ -78,7 +91,10 @@ export default function ContactFormScreen() {
       role: role.trim() || undefined,
       location: location.trim() || undefined,
       tagline: tagline.trim() || undefined,
-      photoUri,
+      photos,
+      position: position || undefined,
+      cut: cut || undefined,
+      zodiac: zodiac || undefined,
       chemistry,
       vibe,
       active,
@@ -122,19 +138,47 @@ export default function ContactFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.photoRow}>
-          <Avatar uri={photoUri} name={name || '?'} size={84} radius={22} />
-          <View style={styles.photoActions}>
-            <Button label="Add photo" variant="ghost" icon={Camera} onPress={pickPhoto} />
-            {photoUri ? (
-              <Pressable onPress={() => setPhotoUri(undefined)} hitSlop={8}>
-                <Text style={styles.removePhoto}>Remove photo</Text>
+        {/* Photos */}
+        <Text style={styles.fieldLabel}>PHOTOS</Text>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.photoRow}
+          keyboardShouldPersistTaps="handled"
+        >
+          {photos.map((uri, i) => (
+            <View key={`${uri}-${i}`} style={styles.thumbWrap}>
+              <Image source={{ uri }} style={styles.thumb} contentFit="cover" transition={150} />
+              {i === 0 && (
+                <View style={styles.coverBadge}>
+                  <Text style={styles.coverText}>COVER</Text>
+                </View>
+              )}
+              <Pressable
+                onPress={() => removePhotoAt(i)}
+                style={styles.thumbRemove}
+                hitSlop={6}
+                accessibilityLabel={`Remove photo ${i + 1}`}
+              >
+                <X size={13} color={colors.textStrong} />
               </Pressable>
+            </View>
+          ))}
+          <Pressable
+            onPress={addPhoto}
+            style={styles.addTile}
+            accessibilityRole="button"
+            accessibilityLabel="Add photo"
+          >
+            {photos.length === 0 ? (
+              <ImagePlus size={22} color={colors.lime} />
             ) : (
-              <Text style={styles.photoHint}>Optional — initials show otherwise.</Text>
+              <Plus size={22} color={colors.lime} />
             )}
-          </View>
-        </View>
+            <Text style={styles.addTileText}>{photos.length === 0 ? 'Add photos' : 'Add'}</Text>
+          </Pressable>
+        </ScrollView>
+        <Text style={styles.photoHint}>First photo is the cover used on your roster.</Text>
 
         <Field
           label="Name"
@@ -177,6 +221,9 @@ export default function ContactFormScreen() {
           multiline
         />
 
+        <ChipSelect label="Position" options={POSITIONS} value={position} onChange={setPosition} />
+        <ChipSelect label="Cut" options={CUTS} value={cut} onChange={setCut} />
+        <ChipSelect label="Zodiac" options={ZODIACS} value={zodiac} onChange={setZodiac} />
         <ChipSelect
           label="Chemistry"
           options={CHEMISTRY}
@@ -221,6 +268,8 @@ export default function ContactFormScreen() {
   );
 }
 
+const THUMB = 96;
+
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.bg },
   header: {
@@ -243,15 +292,66 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scroll: { paddingHorizontal: 20, paddingTop: 20 },
-  photoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    marginBottom: 24,
+  fieldLabel: {
+    color: colors.muted,
+    fontFamily: fonts.bodyMedium,
+    fontSize: 11,
+    letterSpacing: 1.6,
+    marginBottom: 10,
   },
-  photoActions: { flex: 1, gap: 8, alignItems: 'flex-start' },
-  photoHint: { color: colors.muted, fontFamily: fonts.body, fontSize: 11 },
-  removePhoto: { color: colors.danger, fontFamily: fonts.bodyMedium, fontSize: 12 },
+  photoRow: {
+    gap: 10,
+    paddingRight: 8,
+  },
+  thumbWrap: {
+    width: THUMB,
+    height: THUMB * 1.25,
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
+    backgroundColor: colors.panel2,
+  },
+  thumb: { width: '100%', height: '100%' },
+  coverBadge: {
+    position: 'absolute',
+    left: 6,
+    bottom: 6,
+    backgroundColor: colors.lime,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  coverText: {
+    color: colors.onLime,
+    fontFamily: fonts.bodyBold,
+    fontSize: 9,
+    letterSpacing: 1,
+  },
+  thumbRemove: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addTile: {
+    width: THUMB,
+    height: THUMB * 1.25,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.line,
+    borderStyle: 'dashed',
+    backgroundColor: colors.panel3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  addTileText: { color: colors.subtle, fontFamily: fonts.bodyMedium, fontSize: 12 },
+  photoHint: { color: colors.muted, fontFamily: fonts.body, fontSize: 11, marginTop: 8, marginBottom: 20 },
   twoCol: { flexDirection: 'row', gap: 12 },
   toggleRow: {
     flexDirection: 'row',

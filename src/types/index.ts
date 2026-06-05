@@ -22,7 +22,10 @@ export interface Contact {
   age?: number;
   role?: string; // occupation / tagline
   location?: string;
-  photoUri?: string; // remote URL or local file:// URI
+  photos: string[]; // remote URLs or local file:// URIs; photos[0] is the cover
+  position?: string; // Top | Bottom | Side | Vers
+  cut?: string; // Cut | Uncut
+  zodiac?: string; // one of the 12 sun signs
   active: boolean;
   favorite: boolean;
   chemistry: Chemistry;

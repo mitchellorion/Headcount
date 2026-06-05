@@ -168,7 +168,7 @@ function DateRow({
 }) {
   return (
     <Pressable onPress={onPressContact} style={styles.row}>
-      <Avatar uri={row.contact.photoUri} name={row.contact.name} size={48} radius={12} />
+      <Avatar uri={row.contact.photos[0]} name={row.contact.name} size={48} radius={12} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <Text style={styles.rowName}>{row.contact.name}</Text>
         <View style={styles.rowMeta}>
@@ -267,7 +267,7 @@ function ScheduleModal({
                         onPress={() => setContactId(c.id)}
                         style={[styles.whoChip, sel && styles.whoChipSel]}
                       >
-                        <Avatar uri={c.photoUri} name={c.name} size={40} radius={12} />
+                        <Avatar uri={c.photos[0]} name={c.name} size={40} radius={12} />
                         <Text style={[styles.whoName, sel && styles.whoNameSel]}>
                           {c.name}
                         </Text>

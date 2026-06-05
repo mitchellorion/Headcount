@@ -120,12 +120,13 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
   const addContact = useCallback((draft: ContactDraft): Contact => {
     const now = new Date().toISOString();
     const contact: Contact = {
+      ...draft,
       id: uid('c_'),
+      photos: draft.photos ?? [],
       notes: draft.notes ?? [],
       dates: draft.dates ?? [],
       createdAt: now,
       updatedAt: now,
-      ...draft,
     };
     dispatch({ type: 'ADD', contact });
     return contact;

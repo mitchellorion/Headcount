@@ -19,8 +19,12 @@ export function makeSeedContacts(): Contact[] {
       age: 31,
       role: 'Architect',
       location: 'Atlanta',
-      photoUri:
+      photos: [
         'https://images.pexels.com/photos/6322948/pexels-photo-6322948.jpeg?auto=compress&cs=tinysrgb&w=400',
+      ],
+      position: 'Vers',
+      cut: 'Cut',
+      zodiac: 'Scorpio',
       active: true,
       favorite: true,
       chemistry: 'High',
@@ -51,8 +55,12 @@ export function makeSeedContacts(): Contact[] {
       age: 29,
       role: 'Trainer',
       location: 'Atlanta',
-      photoUri:
+      photos: [
         'https://images.pexels.com/photos/17545511/pexels-photo-17545511.jpeg?auto=compress&cs=tinysrgb&w=400',
+      ],
+      position: 'Top',
+      cut: 'Uncut',
+      zodiac: 'Leo',
       active: false,
       favorite: false,
       chemistry: 'Medium',
@@ -76,8 +84,12 @@ export function makeSeedContacts(): Contact[] {
       age: 34,
       role: 'Designer',
       location: 'Atlanta',
-      photoUri:
+      photos: [
         'https://images.pexels.com/photos/12955710/pexels-photo-12955710.jpeg?auto=compress&cs=tinysrgb&w=400',
+      ],
+      position: 'Bottom',
+      cut: 'Cut',
+      zodiac: 'Gemini',
       active: false,
       favorite: false,
       chemistry: 'Unsure',
