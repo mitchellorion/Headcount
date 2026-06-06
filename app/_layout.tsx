@@ -19,6 +19,7 @@ import {
 import { colors } from '@/theme/colors';
 import { ContactsProvider } from '@/store/ContactsContext';
 import { ToastProvider } from '@/components/Toast';
+import { AdConsentModal } from '@/components/AdConsentModal';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
@@ -51,6 +52,9 @@ export default function RootLayout() {
           <ToastProvider>
             <View style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayout}>
               <StatusBar style="light" />
+              <AdConsentModal onUpgrade={() => {
+                // TODO: wire up Google Play in-app billing here
+              }} />
               <Stack
                 screenOptions={{
                   headerShown: false,

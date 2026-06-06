@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   Alert,
   Linking,
@@ -9,6 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronRight,
@@ -19,11 +20,13 @@ import {
   type LucideIcon,
   RotateCcw,
   ShieldCheck,
+  Sparkles,
   Star,
   Trash2,
   Upload,
   Users,
 } from 'lucide-react-native';
+import { setAdFree } from '@/components/AdConsentModal';
 import { router } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
@@ -41,6 +44,30 @@ export default function MoreScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { contacts, resetToSeed, clearAll, cloudUserId, syncToCloud } = useContacts();
+  const [isAdFree, setIsAdFree] = useState(false);
+
+  useEffect(() => {
+    AsyncStorage.getItem('headcount.ad_free.v1').then((v) => setIsAdFree(v === 'true'));
+  }, []);
+
+  const onRemoveAds = () => {
+    Alert.alert(
+      'Remove ads forever',
+      'This is a one-time payment of $2.99. In-app billing coming soon — tap OK to mark as ad-free for now.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Remove ads — $2.99',
+          onPress: async () => {
+            // TODO: trigger Google Play billing here
+            await setAdFree();
+            setIsAdFree(true);
+            toast.show('Ads removed. Thank you! 💚');
+          },
+        },
+      ]
+    );
+  };
 
   const stats = useMemo(() => {
     const active = contacts.filter((c) => c.active).length;
@@ -199,6 +226,24 @@ export default function MoreScreen() {
           <Row icon={Trash2} label="Delete all contacts" danger onPress={onClear} last />
         </View>
 
+        <SectionLabel style={styles.group}>Support HeadCount</SectionLabel>
+        <View style={styles.card}>
+          {isAdFree ? (
+            <View style={styles.adFreeRow}>
+              <Sparkles size={16} color={colors.lime} />
+              <Text style={styles.adFreeText}>You're ad-free. Thank you! 💚</Text>
+            </View>
+          ) : (
+            <Row
+              icon={Sparkles}
+              label="Remove ads forever"
+              hint="One-time payment · $2.99"
+              onPress={onRemoveAds}
+              last
+            />
+          )}
+        </View>
+
         <SectionLabel style={styles.group}>Privacy</SectionLabel>
         <View style={styles.card}>
           <View style={styles.privacyHead}>
@@ -324,4 +369,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 18,
   },
+  adFreeRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 10,
+    paddingVertical: 16,
+  },
+  adFreeText: { color: colors.lime, fontFamily: fonts.bodyMedium, fontSize: 14 },
 });
