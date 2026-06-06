@@ -14,7 +14,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#090909"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.orion.headcount",
@@ -35,20 +37,37 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      ["expo-image-picker", {
-        "photosPermission": "HeadCount needs access to your photos so you can add a picture to a contact.",
-        "cameraPermission": "HeadCount needs camera access so you can take a photo for a contact."
-      }],
-      ["react-native-google-mobile-ads", {
-        "androidAppId": "ca-app-pub-1946277948152462~5775175668"
-      }]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "HeadCount needs access to your photos so you can add a picture to a contact.",
+          "cameraPermission": "HeadCount needs camera access so you can take a photo for a contact."
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-1946277948152462~5775175668"
+        }
+      ],
+      "@react-native-community/datetimepicker"
     ],
-    "experiments": { "typedRoutes": false },
-    "runtimeVersion": { "policy": "appVersion" },
-    "updates": { "url": "https://u.expo.dev/3beb9bdf-2656-443c-87b9-86b4e9624efb" },
+    "experiments": {
+      "typedRoutes": false
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3beb9bdf-2656-443c-87b9-86b4e9624efb"
+    },
     "extra": {
-      "router": { "origin": false },
-      "eas": { "projectId": "3beb9bdf-2656-443c-87b9-86b4e9624efb" }
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "3beb9bdf-2656-443c-87b9-86b4e9624efb"
+      }
     }
   }
 }
