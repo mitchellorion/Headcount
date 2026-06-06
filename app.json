@@ -17,7 +17,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.ctrlaltorion.headcount",
+      "bundleIdentifier": "com.orion.headcount",
       "buildNumber": "1"
     },
     "android": {
