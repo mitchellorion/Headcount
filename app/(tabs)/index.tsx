@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Plus, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react-native';
+import { Clock, Plus, Search, SlidersHorizontal, UserPlus, Users } from 'lucide-react-native';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { useContacts } from '@/store/ContactsContext';
@@ -30,7 +30,7 @@ const SORT_ORDER: SortMode[] = ['recent', 'active', 'name'];
 export default function RosterScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { contacts, hydrated, toggleFavorite } = useContacts();
+  const { contacts, hydrated, toggleFavorite, removeContact } = useContacts();
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState<SortMode>('recent');
 
@@ -67,6 +67,13 @@ export default function RosterScreen() {
   }, [contacts, query, sort]);
 
   const activeCount = contacts.filter((c) => c.active).length;
+
+  const goingCold = useMemo(() => {
+    const threshold = 21 * 86_400_000;
+    return contacts.filter(
+      (c) => c.active && c.lastSeen && Date.now() - new Date(c.lastSeen).getTime() > threshold
+    );
+  }, [contacts]);
 
   const cycleSort = () => {
     const idx = SORT_ORDER.indexOf(sort);
@@ -113,6 +120,17 @@ export default function RosterScreen() {
           />
         </View>
 
+        {goingCold.length > 0 && !query && (
+          <View style={styles.nudge}>
+            <Clock size={13} color={colors.lime} />
+            <Text style={styles.nudgeText}>
+              {goingCold.length === 1
+                ? `${goingCold[0].name} is going cold — it's been a while.`
+                : `${goingCold.length} active connections you haven't seen in 3+ weeks.`}
+            </Text>
+          </View>
+        )}
+
         <View style={styles.listHeader}>
           <SectionLabel>{query ? 'Results' : SORT_LABEL[sort]}</SectionLabel>
           <Pressable
@@ -155,6 +173,7 @@ export default function RosterScreen() {
                 contact={c}
                 onPress={() => router.push(`/contact/${c.id}`)}
                 onToggleFavorite={() => toggleFavorite(c.id)}
+                onDelete={() => removeContact(c.id)}
               />
             ))}
           </View>
@@ -224,6 +243,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     padding: 0,
   },
+  nudge: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    backgroundColor: colors.limeSofter, borderWidth: 1, borderColor: colors.lime,
+    borderRadius: 14, paddingHorizontal: 14, paddingVertical: 10, marginTop: 14,
+  },
+  nudgeText: { color: colors.lime, fontFamily: fonts.body, fontSize: 12, flex: 1 },
   listHeader: {
     marginTop: 26,
     marginBottom: 12,

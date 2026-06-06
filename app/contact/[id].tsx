@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Alert,
+  Modal,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Pressable,
@@ -21,6 +22,7 @@ import {
   MapPin,
   Sparkles,
   Trash2,
+  X,
 } from 'lucide-react-native';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
@@ -51,7 +53,9 @@ export default function ContactDetailScreen() {
   const [noteText, setNoteText] = useState('');
   const [composing, setComposing] = useState(false);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const { width } = useWindowDimensions();
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const { width, height } = useWindowDimensions();
   const galleryWidth = width - 40; // screen minus the scroll's horizontal padding
 
   if (!contact) {
@@ -146,13 +150,17 @@ export default function ContactDetailScreen() {
                 }
               >
                 {contact.photos.map((uri, i) => (
-                  <Image
+                  <Pressable
                     key={`${uri}-${i}`}
-                    source={{ uri }}
-                    style={{ width: galleryWidth, height: 288 }}
-                    contentFit="cover"
-                    transition={200}
-                  />
+                    onPress={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                  >
+                    <Image
+                      source={{ uri }}
+                      style={{ width: galleryWidth, height: 288 }}
+                      contentFit="cover"
+                      transition={200}
+                    />
+                  </Pressable>
                 ))}
               </ScrollView>
               {contact.photos.length > 1 && (
@@ -330,11 +338,61 @@ export default function ContactDetailScreen() {
           />
         </View>
 
+        {/* Tags */}
+        {contact.tags && contact.tags.length > 0 && (
+          <View style={{ marginTop: 20 }}>
+            <SectionLabel>Tags</SectionLabel>
+            <View style={styles.tagRow}>
+              {contact.tags.map((t) => (
+                <View key={t} style={styles.tagChip}>
+                  <Text style={styles.tagChipText}>{t}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
         <Pressable onPress={onDelete} style={styles.deleteRow}>
           <Trash2 size={15} color={colors.danger} />
           <Text style={styles.deleteText}>Remove contact</Text>
         </Pressable>
       </ScrollView>
+
+      {/* Fullscreen photo lightbox */}
+      <Modal visible={lightboxOpen} transparent animationType="fade" onRequestClose={() => setLightboxOpen(false)}>
+        <View style={[styles.lightbox, { width, height }]}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            contentOffset={{ x: lightboxIndex * width, y: 0 }}
+            scrollEventThrottle={16}
+            onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) =>
+              setLightboxIndex(Math.round(e.nativeEvent.contentOffset.x / width))
+            }
+          >
+            {contact.photos.map((uri, i) => (
+              <Image
+                key={`lb-${uri}-${i}`}
+                source={{ uri }}
+                style={{ width, height }}
+                contentFit="contain"
+                transition={150}
+              />
+            ))}
+          </ScrollView>
+          <Pressable onPress={() => setLightboxOpen(false)} style={styles.lightboxClose}>
+            <X size={20} color={colors.textStrong} />
+          </Pressable>
+          {contact.photos.length > 1 && (
+            <View style={styles.lightboxDots}>
+              {contact.photos.map((_, i) => (
+                <View key={i} style={[styles.dot, i === lightboxIndex && styles.dotActive]} />
+              ))}
+            </View>
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -534,4 +592,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   deleteText: { color: colors.danger, fontFamily: fonts.bodyMedium, fontSize: 13 },
+  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  tagChip: {
+    backgroundColor: colors.limeSoft, borderWidth: 1, borderColor: colors.lime,
+    borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6,
+  },
+  tagChipText: { color: colors.lime, fontFamily: fonts.bodyMedium, fontSize: 12 },
+  lightbox: { backgroundColor: '#000', position: 'relative' },
+  lightboxClose: {
+    position: 'absolute', top: 52, right: 20,
+    width: 40, height: 40, borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center',
+    zIndex: 10,
+  },
+  lightboxDots: {
+    position: 'absolute', bottom: 40, left: 0, right: 0,
+    flexDirection: 'row', justifyContent: 'center', gap: 6, zIndex: 10,
+  },
 });

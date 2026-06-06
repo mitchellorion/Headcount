@@ -32,6 +32,7 @@ export interface Contact {
   vibe: Vibe;
   lastSeen?: string; // ISO date (date only granularity is fine)
   tagline?: string; // short blurb shown on roster card
+  tags?: string[]; // e.g. ["Grindr", "IRL", "Hinge"]
   notes: Note[];
   dates: DatePlan[];
   createdAt: string; // ISO

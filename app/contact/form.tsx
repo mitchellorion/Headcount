@@ -8,6 +8,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -55,6 +56,8 @@ export default function ContactFormScreen() {
   const [zodiac, setZodiac] = useState<string>(editing?.zodiac ?? '');
   const [active, setActive] = useState(editing?.active ?? true);
   const [favorite, setFavorite] = useState(editing?.favorite ?? false);
+  const [tags, setTags] = useState<string[]>(editing?.tags ?? []);
+  const [tagInput, setTagInput] = useState('');
 
   const canSave = name.trim().length > 0;
 
@@ -99,6 +102,7 @@ export default function ContactFormScreen() {
       vibe,
       active,
       favorite,
+      tags: tags.length > 0 ? tags : undefined,
     };
 
     if (isEdit && editing) {
@@ -231,6 +235,45 @@ export default function ContactFormScreen() {
           onChange={setChemistry}
         />
         <ChipSelect label="Vibe" options={VIBES} value={vibe} onChange={setVibe} />
+
+        {/* Tags */}
+        <Text style={[styles.fieldLabel, { marginTop: 20 }]}>TAGS</Text>
+        <View style={styles.tagInputRow}>
+          <TextInput
+            value={tagInput}
+            onChangeText={setTagInput}
+            placeholder="Grindr, IRL, Hinge…"
+            placeholderTextColor={colors.muted}
+            style={styles.tagInput}
+            onSubmitEditing={() => {
+              const t = tagInput.trim();
+              if (t && !tags.includes(t)) setTags((prev) => [...prev, t]);
+              setTagInput('');
+            }}
+            returnKeyType="done"
+            blurOnSubmit={false}
+          />
+          <Pressable
+            onPress={() => {
+              const t = tagInput.trim();
+              if (t && !tags.includes(t)) setTags((prev) => [...prev, t]);
+              setTagInput('');
+            }}
+            style={styles.tagAddBtn}
+          >
+            <Plus size={18} color={colors.onLime} />
+          </Pressable>
+        </View>
+        {tags.length > 0 && (
+          <View style={styles.tagList}>
+            {tags.map((t) => (
+              <Pressable key={t} onPress={() => setTags((prev) => prev.filter((x) => x !== t))} style={styles.tagChip}>
+                <Text style={styles.tagChipText}>{t}</Text>
+                <X size={11} color={colors.lime} />
+              </Pressable>
+            ))}
+          </View>
+        )}
 
         <View style={styles.toggleRow}>
           <View>
@@ -367,4 +410,22 @@ const styles = StyleSheet.create({
   },
   toggleLabel: { color: colors.textStrong, fontFamily: fonts.bodyMedium, fontSize: 14 },
   toggleHint: { color: colors.muted, fontFamily: fonts.body, fontSize: 11, marginTop: 2 },
+  tagInputRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
+  tagInput: {
+    flex: 1, backgroundColor: colors.panel2, borderWidth: 1,
+    borderColor: colors.line, borderRadius: 14,
+    paddingHorizontal: 14, paddingVertical: 12,
+    color: colors.textStrong, fontFamily: fonts.body, fontSize: 14,
+  },
+  tagAddBtn: {
+    width: 44, height: 44, borderRadius: 22,
+    backgroundColor: colors.lime, alignItems: 'center', justifyContent: 'center',
+  },
+  tagList: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
+  tagChip: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.limeSoft, borderWidth: 1, borderColor: colors.lime,
+    borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6,
+  },
+  tagChipText: { color: colors.lime, fontFamily: fonts.bodyMedium, fontSize: 12 },
 });

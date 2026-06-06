@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { CalendarDays, Heart, Settings, Users } from 'lucide-react-native';
+import { CalendarDays, Heart, Settings, TrendingUp, Users } from 'lucide-react-native';
 import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 
@@ -46,6 +46,13 @@ export default function TabsLayout() {
         options={{
           title: 'Faves',
           tabBarIcon: ({ color }) => <Heart size={20} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="stats"
+        options={{
+          title: 'Stats',
+          tabBarIcon: ({ color }) => <TrendingUp size={20} color={color} />,
         }}
       />
       <Tabs.Screen

@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/EmptyState';
 export default function FavesScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { contacts, toggleFavorite } = useContacts();
+  const { contacts, toggleFavorite, removeContact } = useContacts();
 
   const faves = useMemo(
     () =>
@@ -52,6 +52,7 @@ export default function FavesScreen() {
                 contact={c}
                 onPress={() => router.push(`/contact/${c.id}`)}
                 onToggleFavorite={() => toggleFavorite(c.id)}
+                onDelete={() => removeContact(c.id)}
               />
             ))}
           </View>
