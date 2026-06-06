@@ -14,6 +14,7 @@ import { colors } from '@/theme/colors';
 import { fonts } from '@/theme/typography';
 import { useContacts } from '@/store/ContactsContext';
 import { AppHeader } from '@/components/AppHeader';
+import { AdBanner } from '@/components/AdBanner';
 import { ContactCard } from '@/components/ContactCard';
 import { EmptyState } from '@/components/EmptyState';
 import { SectionLabel } from '@/components/SectionLabel';
@@ -83,6 +84,7 @@ export default function RosterScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <AppHeader />
+      <AdBanner />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: insets.bottom + 24 }]}
         keyboardShouldPersistTaps="handled"

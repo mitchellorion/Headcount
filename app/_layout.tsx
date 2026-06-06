@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
+import { preloadInterstitial } from '@/lib/ads';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -36,6 +37,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => undefined);
+      preloadInterstitial();
     }
   }, [fontsLoaded, fontError]);
 

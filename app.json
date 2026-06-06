@@ -38,6 +38,9 @@
       ["expo-image-picker", {
         "photosPermission": "HeadCount needs access to your photos so you can add a picture to a contact.",
         "cameraPermission": "HeadCount needs camera access so you can take a photo for a contact."
+      }],
+      ["react-native-google-mobile-ads", {
+        "androidAppId": "ca-app-pub-1946277948152462~5775175668"
       }]
     ],
     "experiments": { "typedRoutes": false },
