@@ -21,7 +21,7 @@
       "buildNumber": "1"
     },
     "android": {
-      "package": "com.ctrlaltorion.headcount",
+      "package": "com.orion.headcount",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#090909"
