@@ -10,7 +10,6 @@ import React, {
 import { Contact, ContactDraft, DatePlan, Note } from '@/types';
 import { uid } from '@/utils/id';
 import { contactRepository } from '@/store/storage';
-import { makeSeedContacts } from '@/store/seed';
 import { supabase } from '@/lib/supabase';
 import { CloudRepository } from '@/store/CloudRepository';
 
@@ -99,13 +98,7 @@ export function ContactsProvider({ children }: { children: React.ReactNode }) {
     (async () => {
       const stored = await contactRepository.load();
       if (cancelled) return;
-      if (stored) {
-        dispatch({ type: 'HYDRATE', contacts: stored });
-      } else {
-        const seeded = makeSeedContacts();
-        dispatch({ type: 'HYDRATE', contacts: seeded });
-        contactRepository.save(seeded).catch(() => undefined);
-      }
+      dispatch({ type: 'HYDRATE', contacts: stored ?? [] });
     })();
     return () => { cancelled = true; };
   }, []);
