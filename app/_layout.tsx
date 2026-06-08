@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import { preloadInterstitial } from '@/lib/ads';
+import { BillingProvider, useBilling } from '@/store/BillingContext';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -23,6 +24,31 @@ import { ToastProvider } from '@/components/Toast';
 import { AdConsentModal } from '@/components/AdConsentModal';
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+function AppShell() {
+  const { purchase } = useBilling();
+  return (
+    <>
+      <AdConsentModal onUpgrade={purchase} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.ink },
+          animation: 'slide_from_right',
+        }}
+      >
+        <Stack.Screen name="index" options={{ animation: 'none' }} />
+        <Stack.Screen name="auth" options={{ animation: 'none' }} />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="contact/[id]" />
+        <Stack.Screen
+          name="contact/form"
+          options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+        />
+      </Stack>
+    </>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useDMSans({
@@ -52,28 +78,12 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ContactsProvider>
           <ToastProvider>
-            <View style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayout}>
-              <StatusBar style="light" />
-              <AdConsentModal onUpgrade={() => {
-                // TODO: wire up Google Play in-app billing here
-              }} />
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: colors.ink },
-                  animation: 'slide_from_right',
-                }}
-              >
-                <Stack.Screen name="index" options={{ animation: 'none' }} />
-                <Stack.Screen name="auth" options={{ animation: 'none' }} />
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="contact/[id]" />
-                <Stack.Screen
-                  name="contact/form"
-                  options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
-                />
-              </Stack>
-            </View>
+            <BillingProvider>
+              <View style={{ flex: 1, backgroundColor: colors.ink }} onLayout={onLayout}>
+                <StatusBar style="light" />
+                <AppShell />
+              </View>
+            </BillingProvider>
           </ToastProvider>
         </ContactsProvider>
       </SafeAreaProvider>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import {
   Alert,
   Linking,
@@ -9,7 +9,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   ChevronRight,
@@ -26,7 +25,7 @@ import {
   Upload,
   Users,
 } from 'lucide-react-native';
-import { setAdFree } from '@/components/AdConsentModal';
+import { useBilling } from '@/store/BillingContext';
 import { router } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
@@ -44,29 +43,25 @@ export default function MoreScreen() {
   const insets = useSafeAreaInsets();
   const toast = useToast();
   const { contacts, resetToSeed, clearAll, cloudUserId, syncToCloud } = useContacts();
-  const [isAdFree, setIsAdFree] = useState(false);
+  const { adFree, purchasing, purchase, restore } = useBilling();
 
-  useEffect(() => {
-    AsyncStorage.getItem('headcount.ad_free.v1').then((v) => setIsAdFree(v === 'true'));
-  }, []);
+  const onRemoveAds = async () => {
+    try {
+      await purchase();
+    } catch {
+      toast.show('Purchase failed. Please try again.');
+    }
+  };
 
-  const onRemoveAds = () => {
-    Alert.alert(
-      'Remove ads forever',
-      'This is a one-time payment of $2.99. In-app billing coming soon — tap OK to mark as ad-free for now.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove ads — $2.99',
-          onPress: async () => {
-            // TODO: trigger Google Play billing here
-            await setAdFree();
-            setIsAdFree(true);
-            toast.show('Ads removed. Thank you! 💚');
-          },
-        },
-      ]
-    );
+  const onRestorePurchase = async () => {
+    const result = await restore();
+    if (result === 'restored') {
+      toast.show('Purchase restored. Ads removed!');
+    } else if (result === 'not_found') {
+      toast.show('No previous purchase found for this account.');
+    } else {
+      toast.show('Could not restore purchase. Check your connection.');
+    }
   };
 
   const stats = useMemo(() => {
@@ -228,19 +223,27 @@ export default function MoreScreen() {
 
         <SectionLabel style={styles.group}>Support HeadCount</SectionLabel>
         <View style={styles.card}>
-          {isAdFree ? (
+          {adFree ? (
             <View style={styles.adFreeRow}>
               <Sparkles size={16} color={colors.lime} />
-              <Text style={styles.adFreeText}>You're ad-free. Thank you! 💚</Text>
+              <Text style={styles.adFreeText}>You're ad-free. Thank you!</Text>
             </View>
           ) : (
-            <Row
-              icon={Sparkles}
-              label="Remove ads forever"
-              hint="One-time payment · $2.99"
-              onPress={onRemoveAds}
-              last
-            />
+            <>
+              <Row
+                icon={Sparkles}
+                label={purchasing ? 'Opening store…' : 'Remove ads forever'}
+                hint="One-time payment · $2.99"
+                onPress={onRemoveAds}
+              />
+              <Row
+                icon={RotateCcw}
+                label="Restore purchase"
+                hint="Already paid? Tap to recover"
+                onPress={onRestorePurchase}
+                last
+              />
+            </>
           )}
         </View>
 
