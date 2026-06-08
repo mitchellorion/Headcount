@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect } from 'react';
-import { preloadInterstitial } from '@/lib/ads';
+import { preloadInterstitial, maybeShowInterstitial } from '@/lib/ads';
 import { BillingProvider, useBilling } from '@/store/BillingContext';
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
@@ -64,6 +64,7 @@ export default function RootLayout() {
     if (fontsLoaded || fontError) {
       SplashScreen.hideAsync().catch(() => undefined);
       preloadInterstitial();
+      maybeShowInterstitial();
     }
   }, [fontsLoaded, fontError]);
 
